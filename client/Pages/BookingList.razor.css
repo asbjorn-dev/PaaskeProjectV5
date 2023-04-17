@@ -2,3 +2,15 @@
     color: black;
     border: 1px solid;
 }
+ table tr:hover {
+        background-color: #ddd;
+    }
+th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #32cd32;
+    color: white;
+    border: 1px solid;
+    color:black
+}
