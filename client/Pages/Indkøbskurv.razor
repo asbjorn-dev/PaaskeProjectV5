@@ -1,0 +1,82 @@
+﻿@page "/indkøbskurv"
+@using sheltermini.Shared
+@using Microsoft.AspNetCore.Components.Forms
+@inject HttpClient Http
+
+<h1>@shelterName</h1>
+
+<EditForm EditContext="@bEditContext" class="row p-3" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+   <div class="col-md-12 mb-3">
+      <label for="FullName">Navn</label>
+      <InputText id="FullName" @bind-Value="booking.FullName" class="form-control" />
+   </div>
+   <div class="col-md-6 mb-3">
+      <label for="Email">Email</label>
+      <InputText id="Email" @bind-Value="booking.Email" class="form-control" />
+   </div>
+   <div class="col-md-12 mb-3">
+      <label for="Phone">Telefon</label>
+      <InputText id="Phone" @bind-Value="booking.Phone" class="form-control" />
+   </div>
+    <div class="col-md-6 mb-3">
+      <label for="Startdate">Start Dato</label>
+      <InputText id="Startdate" @bind-Value="booking.Startdate" class="form-control" />
+   </div>
+    <div class="col-md-6 mb-3">
+      <label for="Slutdate">Slut Dato</label>
+      <InputText id="Slutdate" @bind-Value="booking.Slutdate" class="form-control" />
+   </div>
+   <h3> @tak </h3>
+  
+   <div class="col-12 mb-3">
+      <button type="submit" style="display:@displayer"class="btn btn-primary">Submit</button>
+
+   </div>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? shelterId { get; set; }
+
+    private Booking booking = new Booking(null);
+    private Booking[]? bookingList = new Booking[0];
+    private string shelterName = "";
+    private string tak = "";
+    private string displayer = "block";
+
+
+    private EditContext bEditContext;
+
+    protected override void OnInitialized()
+    {   
+        bEditContext = new EditContext(booking);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await AddBook();
+        tak = "Tak for din booking!";
+        displayer = "none";
+    }
+
+    private async Task AddBook()
+    {
+        await Http.PostAsJsonAsync<Booking>("https://localhost:7195/api/bookinglisten", booking);
+
+        bookingList = await Http.GetFromJsonAsync<Booking[]>("https://localhost:7195/api/bookinglisten");
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Shelter shelter = await Http.GetFromJsonAsync<Shelter>($"https://localhost:7195/api/shelter/{shelterId}");
+        booking.Shelter = shelter;
+        shelterName = shelter.Name;
+    }
+
+
+}

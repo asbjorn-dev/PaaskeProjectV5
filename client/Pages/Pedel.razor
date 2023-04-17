@@ -1,0 +1,70 @@
+﻿@page "/pedel"
+@using System.Text.Json;
+@using sheltermini.Shared;
+@using System.Runtime.Serialization.Formatters;
+@using System.Net.Http.Json;
+@inject HttpClient Http;
+
+
+<h1 class="mb-3 mt-3">Booking Oversigter</h1>
+ 
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Navn</th>
+            <th>Email</th>
+            <th>Startdato</th>
+            <th>Slutdato</th>
+            <th>Shelter navn</th>
+            <th>Telefon nr.</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var booking in bookingLizt)
+        {
+            <tr>
+                <td>@booking.FullName</td>
+                <td>@booking.Email</td>
+                <td>@booking.Startdate</td>
+                <td>@booking.Slutdate</td>
+                <td>@booking.Shelter.Name</td>
+               <td>@booking.Phone</td>
+               <td>
+                <button class="btn btn-danger" @onclick="() => DeleteSingle(booking.Shelter.ShelterId)">Fjern Booking</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+
+    private List<Booking> bookingLizt = new();
+
+    private EditContext cEditContext;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bookingLizt = new();
+        bookingLizt = await Http.GetFromJsonAsync<List<Booking>>("https://localhost:7195/api/bookinglisten");
+        Console.WriteLine(JsonSerializer.Serialize(bookingLizt));
+    }
+
+    public async Task HandleValidSubmit()
+    {
+        //     await RemoveShelter();
+    }
+
+    private async Task DeleteSingle(string shelterId) 
+    {
+        await Http.DeleteAsync($"https://localhost:7195/api/bookinglisten/{shelterId}");
+        //   await Http.GetFromJsonAsync<Booking[]>("https://localhost:7195/api/bookinglisten");
+        await OnInitializedAsync();
+        StateHasChanged();
+        Console.WriteLine(shelterId);
+        //     StateHasChanged();
+
+    }
+
+}

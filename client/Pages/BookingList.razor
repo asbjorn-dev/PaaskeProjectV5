@@ -1,0 +1,90 @@
+﻿@page "/bookings"
+@using sheltermini.Shared;
+@using System.Runtime.Serialization.Formatters;
+@inject HttpClient Http;
+
+<style>
+ 
+</style>
+
+
+<h1 class="mb-3 mt-3">Book Shelters</h1>
+ 
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Kommune</th>
+            <th>Beskrivelse</th>
+            <th>Antal pladser</th>
+            <th>Koordinator</th>
+            <th>Ledig</th>
+            <th>Kontakt</th>
+            <th>Book nu!</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var shelter in ShelterLizt)
+        {
+            <tr>
+                <td>@shelter.Name</td>
+              <td>@shelter.KommuneName</td>
+                <td>@shelter.Description</td>
+                <td>@shelter.Capacity</td>
+                <td>@shelter.lat 
+                    @shelter.longitude</td>
+                <td>@shelter.IsAvailable</td>
+                <td>@shelter.Contact</td>
+                <td><button id="bookbutton" onclick="window.location.href='https://localhost:7268/indk%C3%B8bskurv?shelterId=@shelter.ShelterId';" type="button">Book nu!</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private Shelter shelt = new Shelter();
+
+    private Shelter[] ShelterLizt = new Shelter[0];
+
+    private EditContext aEditContext;
+
+    protected override void OnInitialized()
+    {
+        aEditContext = new EditContext(shelt);
+    }
+
+    public async Task HandleValidSubmit()
+    {
+        await AddShelter();
+    }
+
+    private async Task AddShelter()
+    {
+        await Http.PostAsJsonAsync<Shelter>("https://localhost:7195/api/booking", shelt);
+
+        Console.WriteLine("Klient: add " + shelt.Name);
+        ShelterLizt = await Http.GetFromJsonAsync<Shelter[]>("https://localhost:7195/api/booking");
+        shelt = new(); // clear fields in form
+    }
+
+    public string boolAsText(bool b)
+    {
+        return b ? "YES" : "NO";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ShelterLizt = await Http.GetFromJsonAsync<Shelter[]>("https://localhost:7195/api/booking");
+
+    }
+ 
+    
+  /*
+    private async Task RemoveItem(Shelter shelter)
+    {
+        await Http.DeleteAsync($"https://localhost:7195/api/booking/{shelter.ShelterId}");
+        ShelterLizt = await Http.GetFromJsonAsync<Shelter[]>("https://localhost:7195/api/booking");
+  */
+  
+}
+
